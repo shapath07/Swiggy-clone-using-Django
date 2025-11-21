@@ -1,0 +1,12 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="fw-bold">{{ product.name }}</h2>
+  <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded mb-3" style="max-width: 400px;">
+  <p class="text-muted">{{ product.description }}</p>
+  <p><strong>Price:</strong> ₹{{ product.price }}</p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,108 @@
+ {% extends 'main/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+
+<div class="container mt-5">
+  <h2 class="text-center mb-5 fw-bold text-primary">Your Orders</h2>
+
+  {% if groups %}
+    {% for group in groups %}
+      <div class="mb-5 p-4 border rounded-4 shadow-sm bg-light">
+        <!-- Group Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h4 class="fw-bold text-primary mb-1">Order Group #{{ group.id }}</h4>
+            <p class="text-muted small mb-0">Placed on {{ group.created_at|date:"M d, Y H:i" }}</p>
+          </div>
+        </div>
+
+        <!-- Orders in this group -->
+        <div class="row g-4">
+          {% for order in group.order_set.all %}
+            <div class="col-12">
+              <div class="card order-card p-3 shadow-sm border-0 rounded-4 d-flex flex-row align-items-center">
+                <!-- Product Image -->
+                <div class="order-image me-4">
+                  {% if order.product.image %}
+                    <img src="{{ order.product.image.url }}" 
+                         alt="{{ order.product.name }}" 
+                         class="img-fluid rounded-4"
+                         style="width: 200px; height: 150px; object-fit: cover;">
+                  {% else %}
+                    <img src="https://via.placeholder.com/200x150?text=No+Image"
+                         alt="No Image"
+                         class="img-fluid rounded-4">
+                  {% endif %}
+                </div>
+
+                <!-- Product Info -->
+                <div class="order-info flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="fw-semibold mb-1">{{ order.product.name }}</h4>
+                    <span class="badge bg-light text-dark border">
+                      {{ order.date|date:"M d, Y H:i" }}
+                    </span>
+                  </div>
+
+                  <p class="text-muted small mb-2">{{ order.product.description|truncatewords:25 }}</p>
+
+                  <ul class="list-unstyled mb-3">
+                    <li><strong>Quantity:</strong> {{ order.quantity }}</li>
+                    <li><strong>Price per unit:</strong> ₹{{ order.product.price }}</li>
+                    <li class="text-success fw-bold">Total: ₹{{ order.total_price }}</li>
+                  </ul>
+
+                  <!-- Buttons -->
+                  <div class="d-flex justify-content-between align-items-center">
+                    <form method="POST" action="{% url 'cancel_order' order.id %}" class="d-flex align-items-center">
+                      {% csrf_token %}
+                      <div class="input-group input-group-sm me-2" style="max-width: 150px;">
+                        <span class="input-group-text">Qty</span>
+                        <input type="number" name="quantity" min="1" value="1" class="form-control" required>
+                      </div>
+                      <button type="submit" class="btn btn-danger btn-sm rounded-pill"
+                              onclick="return confirm('Cancel this item?')">
+                        Cancel
+                      </button>
+
+                    <a href="{% url 'details' order.product.name %}" 
+                       class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                      View Details
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Bill Summary -->
+        <div class="mt-4 text-end bg-white p-3 rounded-3 shadow-sm">
+          <h5 class="fw-bold text-secondary mb-2">Billing Summary</h5>
+
+          <p class="mb-1"><strong>Subtotal:</strong> ₹{{ group.total_amount }}</p>
+
+          {% if discounted_bill %}
+            {% with discount=group.total_amount|floatformat:2|add:"-"|add:discounted_bill %}
+              <p class="mb-1 text-success"><strong>Discount Applied:</strong> -₹{{ discount }}</p>
+              <p class="fs-5 fw-bold text-success mb-0">
+                Final Payable: ₹{{ discounted_bill }}
+              </p>
+            {% endwith %}
+          {% else %}
+            <p class="fs-5 fw-bold text-success mb-0">
+              Final Payable: ₹{{ group.total_amount }}
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="text-center mt-5">
+      <p class="text-secondary fs-5">You haven’t placed any orders yet 🍕</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %} 

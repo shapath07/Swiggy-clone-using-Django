@@ -1,0 +1,83 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  /* --- Container Styles --- */
+  .categories-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+  }
+
+  /* --- Grid Layout --- */
+  .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      justify-content: center;
+  }
+
+  /* --- Card Styles --- */
+  .category-card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+      overflow: hidden;
+      transition: all 0.3s ease-in-out;
+      text-decoration: none;
+      color: inherit;
+  }
+
+  .category-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  }
+
+  /* --- Image Styles --- */
+  .category-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+  }
+
+  /* --- Text Styles --- */
+  .category-card .card-body {
+      padding: 15px;
+  }
+
+  .category-card h5 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #333;
+  }
+
+  .category-card p {
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.4;
+  }
+</style>
+
+<div class="categories-container">
+    <h2 class="mb-4 text-center">🍽 Explore Categories</h2>
+
+    <div class="categories-grid">
+        {% for cat in categories %}
+        <a href="{% url 'products_by_category' cat.id %}" class="category-card">
+            {% if cat.image %}
+                <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+            {% else %}
+                <img src="https://via.placeholder.com/220x160?text=No+Image" alt="No image">
+            {% endif %}
+            <div class="card-body">
+                <h5>{{ cat.name }}</h5>
+                {% if cat.description %}
+                    <p>{{ cat.description|truncatewords:12 }}</p>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

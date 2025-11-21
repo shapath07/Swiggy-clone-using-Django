@@ -1,0 +1,167 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  .product-page {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+  }
+
+  /* Accordion Style */
+  .accordion-button {
+      background-color: #ff3c00;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+  }
+
+  .accordion-button:not(.collapsed) {
+      background-color: #e53700;
+      color: #fff;
+  }
+
+  /* Product Grid */
+  .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+  }
+
+  /* Product Card */
+  .product-card {
+      background: #fff;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  }
+
+  .product-card img {
+      width: 100%;
+      height: 50%;
+      object-fit: cover;
+  }
+
+  .product-card .card-body {
+      padding: 15px;
+  }
+
+  .product-card h5 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: #333;
+  }
+
+  .product-card p {
+      font-size: 0.9rem;
+      color: #666;
+      height: 40px;
+      overflow: hidden;
+  }
+
+  .price-tag {
+      font-weight: bold;
+      color: #ff3c00;
+  }
+
+  .btn-buy {
+      background-color: #ff3c00;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      width: 100%;
+      padding: 8px;
+      transition: background 0.3s;
+  }
+
+  .btn-buy:hover {
+      background-color: #e53700;
+  }
+
+  .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+  }
+</style>
+{% if messages %}
+    <div class="container mt-3">
+      {% for message in messages %}
+        <div class="alert alert-success" role="alert">{{ message }}</div>
+      {% endfor %}
+    </div>
+{% endif %}
+<div class="product-page">
+  <h2 class="text-center mb-4">🛒 Products by Category</h2>
+
+  <div class="accordion" id="categoryAccordion">
+    {% for category in categories %}
+    <div class="accordion-item mb-3 border-0">
+      <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse{{ forloop.counter }}"
+                aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                aria-controls="collapse{{ forloop.counter }}">
+          {{ category.name }}
+        </button>
+      </h2>
+
+      <div id="collapse{{ forloop.counter }}"
+           class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+           aria-labelledby="heading{{ forloop.counter }}"
+           data-bs-parent="#categoryAccordion">
+
+        <div class="accordion-body">
+          {% if category.product_set.all %}
+          <div class="product-grid">
+            {% for product in category.product_set.all %}
+            <div class="product-card">
+              {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+              {% else %}
+                <img src="https://via.placeholder.com/250x180?text=No+Image" alt="No image">
+              {% endif %}
+
+              <div class="card-body">
+                <h5>{{ product.name }}</h5>
+                
+                <p class="price-tag">₹{{ product.price }}</p>
+
+                <form method="POST" action="{% url 'add_to_cart' product.id %}">
+                  {% csrf_token %}
+                  <div class="input-group mb-2">
+                    <span class="input-group-text">Qty</span>
+                    <input type="number" name="quantity" min="1" value="1" class="form-control" required>
+                  </div>
+                  <button type="submit" class="btn-buy">Add to cart</button>
+                  
+                </form>
+                <a href="{% url 'details' product.name %}" class="btn btn-primary rounded-pill px-4">
+                  vew_details
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+            <p class="text-muted text-center">No products available in this category.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  
+</div>
+{% endblock %}
